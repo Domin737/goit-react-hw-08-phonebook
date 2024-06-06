@@ -20,10 +20,12 @@ export const addContact = createAsyncThunk(
   'contacts/addContact',
   async (contact, thunkAPI) => {
     try {
+      // Sprawdź strukturę danych
+      console.log('Adding contact:', contact);
       const response = await axios.post('/contacts', contact);
       return response.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.message);
+      return thunkAPI.rejectWithValue(error.response.data || error.message);
     }
   }
 );
@@ -73,6 +75,9 @@ const contactsSlice = createSlice({
         state.contacts = state.contacts.filter(
           contact => contact.id !== action.payload.id
         );
+      })
+      .addCase(addContact.rejected, (state, action) => {
+        state.error = action.payload;
       });
   },
 });
