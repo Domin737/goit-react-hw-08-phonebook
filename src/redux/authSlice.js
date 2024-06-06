@@ -11,7 +11,7 @@ export const registerUser = createAsyncThunk(
       const response = await axios.post('/users/signup', credentials);
       return response.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.message);
+      return thunkAPI.rejectWithValue(error.response.data); // Zwracaj pełny obiekt odpowiedzi
     }
   }
 );
@@ -21,9 +21,10 @@ export const loginUser = createAsyncThunk(
   async (credentials, thunkAPI) => {
     try {
       const response = await axios.post('/users/login', credentials);
+      axios.defaults.headers.common.Authorization = `Bearer ${response.data.token}`;
       return response.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.message);
+      return thunkAPI.rejectWithValue(error.response.data); // Zwracaj pełny obiekt odpowiedzi
     }
   }
 );
@@ -33,8 +34,9 @@ export const logoutUser = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       await axios.post('/users/logout');
+      axios.defaults.headers.common.Authorization = '';
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.message);
+      return thunkAPI.rejectWithValue(error.response.data); // Zwracaj pełny obiekt odpowiedzi
     }
   }
 );
@@ -75,6 +77,12 @@ const authSlice = createSlice({
         state.user = null;
         state.token = null;
         state.isLoggedIn = false;
+      })
+      .addCase(registerUser.rejected, (state, action) => {
+        state.error = action.payload;
+      })
+      .addCase(loginUser.rejected, (state, action) => {
+        state.error = action.payload;
       });
   },
 });

@@ -1,6 +1,6 @@
 // src/components/App/App.jsx
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import RegisterPage from '../../pages/RegisterPage/RegisterPage';
 import LoginPage from '../../pages/LoginPage/LoginPage';
 import ContactsPage from '../../pages/ContactsPage/ContactsPage';
@@ -8,7 +8,7 @@ import Navigation from '../Navigation/Navigation';
 
 const App = () => {
   return (
-    <Router basename="/goit-react-hw-08-phonebook">
+    <div>
       <Navigation />
       <Routes>
         <Route path="/register" element={<RegisterPage />} />
@@ -16,7 +16,7 @@ const App = () => {
         <Route path="/contacts" element={<ContactsPage />} />
         <Route path="/" element={<LoginPage />} />
       </Routes>
-    </Router>
+    </div>
   );
 };
 
