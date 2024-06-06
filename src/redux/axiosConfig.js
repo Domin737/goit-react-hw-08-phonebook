@@ -1,6 +1,6 @@
 // src/redux/axiosConfig.js
 import axios from 'axios';
-import { store } from './store'; // Importuj store
+import { store } from './store';
 
 axios.defaults.baseURL = 'https://connections-api.herokuapp.com';
 

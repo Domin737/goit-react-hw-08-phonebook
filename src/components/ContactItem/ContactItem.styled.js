@@ -1,3 +1,4 @@
+// src/components/ContactItem/ContactItem.styled.js
 import styled from 'styled-components';
 
 export const Item = styled.li`

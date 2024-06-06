@@ -5,7 +5,7 @@ import { registerUser } from '../../redux/authSlice';
 import { Form, Label, Input, Button } from './RegisterPage.styled';
 
 const RegisterPage = () => {
-  const [name, setName] = useState(''); // Dodaj pole name
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const dispatch = useDispatch();
@@ -13,7 +13,7 @@ const RegisterPage = () => {
 
   const handleSubmit = e => {
     e.preventDefault();
-    dispatch(registerUser({ name, email, password })); // Przesyłaj również name
+    dispatch(registerUser({ name, email, password }));
   };
 
   return (
@@ -25,8 +25,7 @@ const RegisterPage = () => {
           value={name}
           onChange={e => setName(e.target.value)}
           required
-        />{' '}
-        {/* Dodaj pole name */}
+        />
       </Label>
       <Label>
         Email
@@ -46,7 +45,7 @@ const RegisterPage = () => {
           required
         />
       </Label>
-      {error && <p>{error}</p>}
+      {error && <p>{error.message}</p>}
       <Button type="submit">Register</Button>
     </Form>
   );

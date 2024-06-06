@@ -1,3 +1,4 @@
+// src/components/App/App.styled.js
 import styled from 'styled-components';
 
 export const Container = styled.div`

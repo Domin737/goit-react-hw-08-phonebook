@@ -1,3 +1,4 @@
+// src/pages/RegisterPage/RegisterPage.styled.js
 import styled from 'styled-components';
 
 export const Form = styled.form`

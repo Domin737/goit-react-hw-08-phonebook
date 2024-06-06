@@ -35,7 +35,7 @@ const LoginPage = () => {
           required
         />
       </Label>
-      {error && <p>{error}</p>}
+      {error && <p>{error.message}</p>}
       <Button type="submit">Login</Button>
     </Form>
   );

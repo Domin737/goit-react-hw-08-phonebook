@@ -1,3 +1,4 @@
+// src/components/ContactList/ContactList.jsx
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchContacts, deleteContact } from '../../redux/contactsSlice';
