@@ -1,18 +1,20 @@
 import React from 'react';
-import ContactForm from '../ContactForm/ContactForm';
-import ContactList from '../ContactList/ContactList';
-import Filter from '../Filter/Filter';
-import { Container, Title, SubTitle } from '../App.styled';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import RegisterPage from '../../pages/RegisterPage/RegisterPage';
+import LoginPage from '../../pages/LoginPage/LoginPage';
+import ContactsPage from '../../pages/ContactsPage/ContactsPage';
+import Navigation from '../Navigation/Navigation';
 
 const App = () => {
   return (
-    <Container>
-      <Title>Phonebook</Title>
-      <ContactForm />
-      <SubTitle>Contacts</SubTitle>
-      <Filter />
-      <ContactList />
-    </Container>
+    <Router>
+      <Navigation />
+      <Routes>
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/contacts" element={<ContactsPage />} />
+      </Routes>
+    </Router>
   );
 };
 

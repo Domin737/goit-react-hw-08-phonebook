@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchContacts, deleteContact } from '../../redux/contactsSlice';
 import ContactItem from '../ContactItem/ContactItem';
-import { List } from '../ContactList.styled';
+import { List } from './ContactList.styled';
 
 const ContactList = () => {
   const { contacts, filter, status, error } = useSelector(
@@ -26,7 +26,6 @@ const ContactList = () => {
     return <div>Error: {error}</div>;
   }
 
-  // Dodane sprawdzenie
   if (!contacts) {
     return <div>No contacts available</div>;
   }

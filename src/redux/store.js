@@ -1,38 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit';
+import authReducer from './authSlice';
 import contactsReducer from './contactsSlice';
 
-const loadState = () => {
-  try {
-    const serializedState = localStorage.getItem('contacts');
-    if (serializedState === null) {
-      return undefined;
-    }
-    return { contacts: JSON.parse(serializedState) };
-  } catch (err) {
-    return undefined;
-  }
-};
-
-const saveState = state => {
-  try {
-    const serializedState = JSON.stringify(state.contacts);
-    localStorage.setItem('contacts', serializedState);
-  } catch (err) {
-    // Ignore write errors
-  }
-};
-
-const preloadedState = loadState();
-
-const store = configureStore({
+export const store = configureStore({
   reducer: {
+    auth: authReducer,
     contacts: contactsReducer,
   },
-  preloadedState,
 });
-
-store.subscribe(() => {
-  saveState(store.getState());
-});
-
-export { store };
