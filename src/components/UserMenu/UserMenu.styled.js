@@ -1,3 +1,4 @@
+// src/components/UserMenu/UserMenu.styled.js
 import styled from 'styled-components';
 
 export const MenuContainer = styled.div`

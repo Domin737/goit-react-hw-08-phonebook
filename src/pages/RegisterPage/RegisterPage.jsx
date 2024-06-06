@@ -1,5 +1,6 @@
+// src/pages/RegisterPage/RegisterPage.jsx
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { registerUser } from '../../redux/authSlice';
 import { Form, Label, Input, Button } from './RegisterPage.styled';
 
@@ -7,6 +8,7 @@ const RegisterPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const dispatch = useDispatch();
+  const error = useSelector(state => state.auth.error);
 
   const handleSubmit = e => {
     e.preventDefault();
@@ -31,6 +33,7 @@ const RegisterPage = () => {
           onChange={e => setPassword(e.target.value)}
         />
       </Label>
+      {error && <p>{error}</p>}
       <Button type="submit">Register</Button>
     </Form>
   );

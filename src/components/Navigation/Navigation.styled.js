@@ -1,3 +1,4 @@
+// src/components/Navigation/Navigation.styled.js
 import styled from 'styled-components';
 
 export const Nav = styled.nav`
@@ -15,5 +16,10 @@ export const Nav = styled.nav`
     &:hover {
       color: #0056b3;
     }
+  }
+
+  div {
+    display: flex;
+    align-items: center;
   }
 `;

@@ -1,5 +1,6 @@
+// src/pages/LoginPage/LoginPage.jsx
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { loginUser } from '../../redux/authSlice';
 import { Form, Label, Input, Button } from './LoginPage.styled';
 
@@ -7,6 +8,7 @@ const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const dispatch = useDispatch();
+  const error = useSelector(state => state.auth.error);
 
   const handleSubmit = e => {
     e.preventDefault();
@@ -31,6 +33,7 @@ const LoginPage = () => {
           onChange={e => setPassword(e.target.value)}
         />
       </Label>
+      {error && <p>{error}</p>}
       <Button type="submit">Login</Button>
     </Form>
   );

@@ -1,3 +1,4 @@
+// src/components/UserMenu/UserMenu.jsx
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { logoutUser } from '../../redux/authSlice';
@@ -13,7 +14,7 @@ const UserMenu = () => {
 
   return (
     <MenuContainer>
-      <Email>{user.email}</Email>
+      <Email>{user?.email}</Email>
       <LogoutButton onClick={handleLogout}>Logout</LogoutButton>
     </MenuContainer>
   );

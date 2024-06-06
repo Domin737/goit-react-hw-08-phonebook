@@ -1,3 +1,4 @@
+// src/components/App/App.jsx
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import RegisterPage from '../../pages/RegisterPage/RegisterPage';
@@ -7,7 +8,7 @@ import Navigation from '../Navigation/Navigation';
 
 const App = () => {
   return (
-    <Router>
+    <Router basename="/goit-react-hw-08-phonebook">
       <Navigation />
       <Routes>
         <Route path="/register" element={<RegisterPage />} />
