@@ -17,7 +17,6 @@ root.render(
   </Provider>
 );
 
-
 /* src/index.css */
 @import-normalize; /* bring in normalize.css styles */
 

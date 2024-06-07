@@ -22,7 +22,6 @@ const App = () => {
 
 export default App;
 
-
 // src/components/App/App.styled.js
 import styled from 'styled-components';
 
@@ -48,7 +47,6 @@ export const SubTitle = styled.h2`
   color: #333;
   text-align: center;
 `;
-
 
 // src/components/ContactForm/ContactForm.jsx
 import React, { useState } from 'react';
@@ -95,8 +93,6 @@ const ContactForm = () => {
 
 export default ContactForm;
 
-
-
 // src/components/ContactForm/ContactForm.styled.js
 import styled from 'styled-components';
 
@@ -136,7 +132,6 @@ export const Button = styled.button`
   }
 `;
 
-
 // src/components/ContactItem/ContactItem.jsx
 import React from 'react';
 import PropTypes from 'prop-types';
@@ -163,7 +158,6 @@ ContactItem.propTypes = {
 };
 
 export default ContactItem;
-
 
 // src/components/ContactItem/ContactItem.styled.js
 import styled from 'styled-components';
@@ -192,7 +186,6 @@ export const Button = styled.button`
     background-color: #cc0000;
   }
 `;
-
 
 // src/components/ContactList/ContactList.jsx
 import React, { useEffect } from 'react';
@@ -242,7 +235,6 @@ const ContactList = () => {
 
 export default ContactList;
 
-
 // src/components/ContactList/ContactList.styled.js
 import styled from 'styled-components';
 
@@ -251,7 +243,6 @@ export const List = styled.ul`
   padding: 0;
   margin: 0;
 `;
-
 
 // src/components/Filter/Filter.jsx
 import React from 'react';
@@ -277,7 +268,6 @@ const Filter = () => {
 
 export default Filter;
 
-
 // src/components/Filter/Filter.styled.js
 import styled from 'styled-components';
 
@@ -295,7 +285,6 @@ export const Input = styled.input`
   border: 1px solid #ccc;
   border-radius: 5px;
 `;
-
 
 // src/components/Navigation/Navigation.jsx
 import React from 'react';
@@ -318,7 +307,6 @@ const Navigation = () => {
 };
 
 export default Navigation;
-
 
 // src/components/Navigation/Navigation.styled.js
 import styled from 'styled-components';
@@ -346,7 +334,6 @@ export const Nav = styled.nav`
   }
 `;
 
-
 // src/components/UserMenu/UserMenu.jsx
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -370,7 +357,6 @@ const UserMenu = () => {
 };
 
 export default UserMenu;
-
 
 // src/components/UserMenu/UserMenu.styled.js
 import styled from 'styled-components';

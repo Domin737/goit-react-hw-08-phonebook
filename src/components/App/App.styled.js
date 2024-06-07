@@ -3,11 +3,9 @@ import styled from 'styled-components';
 
 export const Container = styled.div`
   padding: 20px;
-  max-width: 500px;
+  max-width: 1200px;
   margin: 0 auto;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
 `;
 
 export const Title = styled.h1`

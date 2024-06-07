@@ -17,9 +17,7 @@ const ContactsPage = () => {
 
 export default ContactsPage;
 
-
 // src/pages/ContactsPage/ContactsPage.styled.js
-
 
 // src/pages/LoginPage/LoginPage.jsx
 import React, { useState } from 'react';
@@ -66,8 +64,6 @@ const LoginPage = () => {
 
 export default LoginPage;
 
-
-
 // src/pages/LoginPage/LoginPage.styled.js
 import styled from 'styled-components';
 
@@ -111,7 +107,6 @@ export const Button = styled.button`
     background-color: #0056b3;
   }
 `;
-
 
 // src/pages/RegisterPage/RegisterPage.jsx
 import React, { useState } from 'react';
@@ -167,8 +162,6 @@ const RegisterPage = () => {
 };
 
 export default RegisterPage;
-
-
 
 // src/pages/RegisterPage/RegisterPage.styled.js
 import styled from 'styled-components';

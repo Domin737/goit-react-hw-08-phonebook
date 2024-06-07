@@ -5,10 +5,11 @@ import RegisterPage from '../../pages/RegisterPage/RegisterPage';
 import LoginPage from '../../pages/LoginPage/LoginPage';
 import ContactsPage from '../../pages/ContactsPage/ContactsPage';
 import Navigation from '../Navigation/Navigation';
+import { Container } from './App.styled';
 
 const App = () => {
   return (
-    <div>
+    <Container>
       <Navigation />
       <Routes>
         <Route path="/register" element={<RegisterPage />} />
@@ -16,7 +17,7 @@ const App = () => {
         <Route path="/contacts" element={<ContactsPage />} />
         <Route path="/" element={<LoginPage />} />
       </Routes>
-    </div>
+    </Container>
   );
 };
 
