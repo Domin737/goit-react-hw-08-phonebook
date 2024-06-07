@@ -1,18 +1,36 @@
 // src/pages/LoginPage/LoginPage.jsx
+
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginUser } from '../../redux/authSlice';
+import { useNavigate } from 'react-router-dom';
 import { Form, Label, Input, Button } from './LoginPage.styled';
 
 const LoginPage = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+  });
   const dispatch = useDispatch();
   const error = useSelector(state => state.auth.error);
+  const navigate = useNavigate();
 
-  const handleSubmit = e => {
+  const handleChange = e => {
+    const { name, value } = e.target;
+    setFormData(prevFormData => ({
+      ...prevFormData,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async e => {
     e.preventDefault();
-    dispatch(loginUser({ email, password }));
+    try {
+      await dispatch(loginUser(formData)).unwrap();
+      navigate('/contacts');
+    } catch (error) {
+      console.error('Login failed:', error);
+    }
   };
 
   return (
@@ -21,21 +39,21 @@ const LoginPage = () => {
         Email
         <Input
           type="email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          required
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
         />
       </Label>
       <Label>
         Password
         <Input
           type="password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          required
+          name="password"
+          value={formData.password}
+          onChange={handleChange}
         />
       </Label>
-      {error && <p>{error.message}</p>}
+      {error && <p>Error: {error}</p>}
       <Button type="submit">Login</Button>
     </Form>
   );

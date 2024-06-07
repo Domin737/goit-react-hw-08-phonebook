@@ -4,6 +4,15 @@ import axios from 'axios';
 
 axios.defaults.baseURL = 'https://connections-api.herokuapp.com';
 
+const token = {
+  set(token) {
+    axios.defaults.headers.common.Authorization = `Bearer ${token}`;
+  },
+  unset() {
+    axios.defaults.headers.common.Authorization = '';
+  },
+};
+
 export const registerUser = createAsyncThunk(
   'auth/register',
   async (credentials, thunkAPI) => {
@@ -21,10 +30,10 @@ export const loginUser = createAsyncThunk(
   async (credentials, thunkAPI) => {
     try {
       const response = await axios.post('/users/login', credentials);
-      axios.defaults.headers.common.Authorization = `Bearer ${response.data.token}`;
+      token.set(response.data.token);
       return response.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.response.data);
+      return thunkAPI.rejectWithValue(error.message);
     }
   }
 );
@@ -34,9 +43,29 @@ export const logoutUser = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       await axios.post('/users/logout');
-      axios.defaults.headers.common.Authorization = '';
+      token.unset();
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.response.data);
+      return thunkAPI.rejectWithValue(error.message);
+    }
+  }
+);
+
+export const refreshUser = createAsyncThunk(
+  'auth/refresh',
+  async (_, thunkAPI) => {
+    const state = thunkAPI.getState();
+    const persistedToken = state.auth.token;
+
+    if (persistedToken === null) {
+      return thunkAPI.rejectWithValue('Unable to fetch user');
+    }
+
+    try {
+      token.set(persistedToken);
+      const response = await axios.get('/users/current');
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.message);
     }
   }
 );
@@ -47,19 +76,8 @@ const authSlice = createSlice({
     user: null,
     token: null,
     isLoggedIn: false,
+    isRefreshing: false,
     error: null,
-  },
-  reducers: {
-    setCredentials: (state, action) => {
-      state.user = action.payload.user;
-      state.token = action.payload.token;
-      state.isLoggedIn = true;
-    },
-    clearCredentials: state => {
-      state.user = null;
-      state.token = null;
-      state.isLoggedIn = false;
-    },
   },
   extraReducers: builder => {
     builder
@@ -78,14 +96,18 @@ const authSlice = createSlice({
         state.token = null;
         state.isLoggedIn = false;
       })
-      .addCase(registerUser.rejected, (state, action) => {
-        state.error = action.payload;
+      .addCase(refreshUser.pending, state => {
+        state.isRefreshing = true;
       })
-      .addCase(loginUser.rejected, (state, action) => {
-        state.error = action.payload;
+      .addCase(refreshUser.fulfilled, (state, action) => {
+        state.user = action.payload;
+        state.isLoggedIn = true;
+        state.isRefreshing = false;
+      })
+      .addCase(refreshUser.rejected, state => {
+        state.isRefreshing = false;
       });
   },
 });
 
-export const { setCredentials, clearCredentials } = authSlice.actions;
 export default authSlice.reducer;
