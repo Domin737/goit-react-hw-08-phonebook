@@ -28,11 +28,9 @@ const RegisterPage = () => {
     e.preventDefault();
     try {
       await dispatch(registerUser(formData)).unwrap();
-      navigate('/contacts'); // Przekieruj po rejestracji
+      navigate('/contacts');
     } catch (error) {
-      // Obsługa błędów (np. wyświetl komunikat o błędzie)
       console.error('Registration failed:', error);
-      // Możesz tutaj dodać logikę wyświetlania komunikatu o błędzie dla użytkownika
     }
   };
 
