@@ -1,19 +1,39 @@
 // src/pages/RegisterPage/RegisterPage.jsx
+
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { registerUser } from '../../redux/authSlice';
+import { useNavigate } from 'react-router-dom';
 import { Form, Label, Input, Button } from './RegisterPage.styled';
 
 const RegisterPage = () => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+  });
   const dispatch = useDispatch();
   const error = useSelector(state => state.auth.error);
+  const navigate = useNavigate();
 
-  const handleSubmit = e => {
+  const handleChange = e => {
+    const { name, value } = e.target;
+    setFormData(prevFormData => ({
+      ...prevFormData,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async e => {
     e.preventDefault();
-    dispatch(registerUser({ name, email, password }));
+    try {
+      await dispatch(registerUser(formData)).unwrap();
+      navigate('/contacts'); // Przekieruj po rejestracji
+    } catch (error) {
+      // Obsługa błędów (np. wyświetl komunikat o błędzie)
+      console.error('Registration failed:', error);
+      // Możesz tutaj dodać logikę wyświetlania komunikatu o błędzie dla użytkownika
+    }
   };
 
   return (
@@ -22,8 +42,9 @@ const RegisterPage = () => {
         Name
         <Input
           type="text"
-          value={name}
-          onChange={e => setName(e.target.value)}
+          name="name"
+          value={formData.name}
+          onChange={handleChange}
           required
         />
       </Label>
@@ -31,8 +52,9 @@ const RegisterPage = () => {
         Email
         <Input
           type="email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
           required
         />
       </Label>
@@ -40,12 +62,13 @@ const RegisterPage = () => {
         Password
         <Input
           type="password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
+          name="password"
+          value={formData.password}
+          onChange={handleChange}
           required
         />
       </Label>
-      {error && <p>{error.message}</p>}
+      {error && <p>Error: {error}</p>}
       <Button type="submit">Register</Button>
     </Form>
   );
