@@ -12,22 +12,40 @@ export const Nav = styled.nav`
     color: #007bff;
     font-size: 1.2rem;
     transition: color 0.3s, background-color 0.3s;
-    padding: 10px;
+    padding: 10px 20px;
     border-radius: 5px;
+    margin: 0 5px;
+    border: 1px solid transparent;
 
     &:hover {
-      color: #0056b3;
-      background-color: #e1e1e1;
+      color: #ffffff;
+      background-color: #007bff;
     }
 
     &.active {
-      color: #0056b3;
-      background-color: #e1e1e1;
+      color: #ffffff;
+      background-color: #007bff;
     }
   }
 
   div {
     display: flex;
     align-items: center;
+  }
+
+  button {
+    height: 40px;
+    padding: 0 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #dc3545;
+    color: #ffffff;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+
+    &:hover {
+      background-color: #c82333;
+    }
   }
 `;

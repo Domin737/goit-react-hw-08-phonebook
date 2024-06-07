@@ -10,9 +10,11 @@ const Navigation = () => {
 
   return (
     <Nav>
-      <NavLink to="/register">Register</NavLink>
-      <NavLink to="/login">Login</NavLink>
-      {isLoggedIn && <NavLink to="/contacts">Contacts</NavLink>}
+      <div>
+        {!isLoggedIn && <NavLink to="/register">Register</NavLink>}
+        {!isLoggedIn && <NavLink to="/login">Login</NavLink>}
+        {isLoggedIn && <NavLink to="/contacts">Contacts</NavLink>}
+      </div>
       {isLoggedIn && <UserMenu />}
     </Nav>
   );
