@@ -5,10 +5,11 @@ import RegisterPage from '../../pages/RegisterPage/RegisterPage';
 import LoginPage from '../../pages/LoginPage/LoginPage';
 import ContactsPage from '../../pages/ContactsPage/ContactsPage';
 import Navigation from '../Navigation/Navigation';
+import { Container } from './App.styled';
 
 const App = () => {
   return (
-    <div>
+    <Container>
       <Navigation />
       <Routes>
         <Route path="/register" element={<RegisterPage />} />
@@ -16,7 +17,7 @@ const App = () => {
         <Route path="/contacts" element={<ContactsPage />} />
         <Route path="/" element={<LoginPage />} />
       </Routes>
-    </div>
+    </Container>
   );
 };
 
@@ -27,11 +28,9 @@ import styled from 'styled-components';
 
 export const Container = styled.div`
   padding: 20px;
-  max-width: 500px;
+  max-width: 1200px;
   margin: 0 auto;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
 `;
 
 export const Title = styled.h1`
@@ -243,7 +242,6 @@ export const List = styled.ul`
   padding: 0;
   margin: 0;
 `;
-
 // src/components/Filter/Filter.jsx
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -298,9 +296,11 @@ const Navigation = () => {
 
   return (
     <Nav>
-      <NavLink to="/register">Register</NavLink>
-      <NavLink to="/login">Login</NavLink>
-      <NavLink to="/contacts">Contacts</NavLink>
+      <div>
+        {!isLoggedIn && <NavLink to="/register">Register</NavLink>}
+        {!isLoggedIn && <NavLink to="/login">Login</NavLink>}
+        {isLoggedIn && <NavLink to="/contacts">Contacts</NavLink>}
+      </div>
       {isLoggedIn && <UserMenu />}
     </Nav>
   );
@@ -313,7 +313,7 @@ import styled from 'styled-components';
 
 export const Nav = styled.nav`
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   padding: 10px;
   background-color: #f1f1f1;
 
@@ -321,16 +321,42 @@ export const Nav = styled.nav`
     text-decoration: none;
     color: #007bff;
     font-size: 1.2rem;
-    transition: color 0.3s;
+    transition: color 0.3s, background-color 0.3s;
+    padding: 10px 20px;
+    border-radius: 5px;
+    margin: 0 5px;
+    border: 1px solid transparent;
 
     &:hover {
-      color: #0056b3;
+      color: #ffffff;
+      background-color: #007bff;
+    }
+
+    &.active {
+      color: #ffffff;
+      background-color: #007bff;
     }
   }
 
   div {
     display: flex;
     align-items: center;
+  }
+
+  button {
+    height: 40px;
+    padding: 0 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #dc3545;
+    color: #ffffff;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+
+    &:hover {
+      background-color: #c82333;
+    }
   }
 `;
 
