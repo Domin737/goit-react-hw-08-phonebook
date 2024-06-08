@@ -66,7 +66,13 @@ const RegisterPage = () => {
           required
         />
       </Label>
-      {error && <p>Error: {error}</p>}
+      {error && (
+        <p>
+          {error === 'User already exists'
+            ? 'Użytkownik już istnieje'
+            : `Błąd: ${error}`}
+        </p>
+      )}
       <Button type="submit">Register</Button>
     </Form>
   );

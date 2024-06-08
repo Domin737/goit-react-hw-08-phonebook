@@ -53,7 +53,13 @@ const LoginPage = () => {
           onChange={handleChange}
         />
       </Label>
-      {error && <p>Error: {error}</p>}
+      {error && (
+        <p>
+          {error === 'Request failed with status code 401'
+            ? 'Niepoprawne poświadczenia'
+            : `Błąd: ${error}`}
+        </p>
+      )}
       <Button type="submit">Login</Button>
     </Form>
   );

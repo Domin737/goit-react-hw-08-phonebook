@@ -90,7 +90,9 @@ export const registerUser = createAsyncThunk(
       const response = await axios.post('/users/signup', credentials);
       return response.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.response.data);
+      return thunkAPI.rejectWithValue(
+        error.response.data.message || error.message
+      );
     }
   }
 );
@@ -103,7 +105,9 @@ export const loginUser = createAsyncThunk(
       token.set(response.data.token);
       return response.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.message);
+      return thunkAPI.rejectWithValue(
+        error.response.data.message || error.message
+      );
     }
   }
 );
@@ -155,16 +159,25 @@ const authSlice = createSlice({
         state.user = action.payload.user;
         state.token = action.payload.token;
         state.isLoggedIn = true;
+        state.error = null;
+      })
+      .addCase(registerUser.rejected, (state, action) => {
+        state.error = action.payload;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.user = action.payload.user;
         state.token = action.payload.token;
         state.isLoggedIn = true;
+        state.error = null;
+      })
+      .addCase(loginUser.rejected, (state, action) => {
+        state.error = action.payload;
       })
       .addCase(logoutUser.fulfilled, state => {
         state.user = null;
         state.token = null;
         state.isLoggedIn = false;
+        state.error = null;
       })
       .addCase(refreshUser.pending, state => {
         state.isRefreshing = true;
@@ -173,6 +186,7 @@ const authSlice = createSlice({
         state.user = action.payload;
         state.isLoggedIn = true;
         state.isRefreshing = false;
+        state.error = null;
       })
       .addCase(refreshUser.rejected, state => {
         state.isRefreshing = false;
@@ -181,6 +195,7 @@ const authSlice = createSlice({
 });
 
 export default authSlice.reducer;
+
 
 // src/redux/axiosConfig.js
 import axios from 'axios';
@@ -376,13 +391,20 @@ const LoginPage = () => {
           onChange={handleChange}
         />
       </Label>
-      {error && <p>Error: {error}</p>}
+      {error && (
+        <p>
+          {error === 'Request failed with status code 401'
+            ? 'Niepoprawne poświadczenia'
+            : `Błąd: ${error}`}
+        </p>
+      )}
       <Button type="submit">Login</Button>
     </Form>
   );
 };
 
 export default LoginPage;
+
 
 // src/pages/LoginPage/LoginPage.styled.js
 import styled from 'styled-components';
@@ -496,13 +518,20 @@ const RegisterPage = () => {
           required
         />
       </Label>
-      {error && <p>Error: {error}</p>}
+      {error && (
+        <p>
+          {error === 'User already exists'
+            ? 'Użytkownik już istnieje'
+            : `Błąd: ${error}`}
+        </p>
+      )}
       <Button type="submit">Register</Button>
     </Form>
   );
 };
 
 export default RegisterPage;
+
 
 // src/pages/RegisterPage/RegisterPage.styled.js
 import styled from 'styled-components';

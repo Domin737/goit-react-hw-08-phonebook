@@ -20,7 +20,9 @@ export const registerUser = createAsyncThunk(
       const response = await axios.post('/users/signup', credentials);
       return response.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.response.data);
+      return thunkAPI.rejectWithValue(
+        error.response.data.message || error.message
+      );
     }
   }
 );
@@ -33,7 +35,9 @@ export const loginUser = createAsyncThunk(
       token.set(response.data.token);
       return response.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.message);
+      return thunkAPI.rejectWithValue(
+        error.response.data.message || error.message
+      );
     }
   }
 );
@@ -85,16 +89,25 @@ const authSlice = createSlice({
         state.user = action.payload.user;
         state.token = action.payload.token;
         state.isLoggedIn = true;
+        state.error = null;
+      })
+      .addCase(registerUser.rejected, (state, action) => {
+        state.error = action.payload;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.user = action.payload.user;
         state.token = action.payload.token;
         state.isLoggedIn = true;
+        state.error = null;
+      })
+      .addCase(loginUser.rejected, (state, action) => {
+        state.error = action.payload;
       })
       .addCase(logoutUser.fulfilled, state => {
         state.user = null;
         state.token = null;
         state.isLoggedIn = false;
+        state.error = null;
       })
       .addCase(refreshUser.pending, state => {
         state.isRefreshing = true;
@@ -103,6 +116,7 @@ const authSlice = createSlice({
         state.user = action.payload;
         state.isLoggedIn = true;
         state.isRefreshing = false;
+        state.error = null;
       })
       .addCase(refreshUser.rejected, state => {
         state.isRefreshing = false;
