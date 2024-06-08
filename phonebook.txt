@@ -1,0 +1,988 @@
+// src/index.js
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { Provider } from 'react-redux';
+import { BrowserRouter } from 'react-router-dom';
+import App from './components/App/App';
+import GlobalStyles from './styles/GlobalStyles';
+import { store } from './redux/store';
+import './redux/axiosConfig';
+import './index.css';
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
+  <Provider store={store}>
+    <BrowserRouter basename="/goit-react-hw-08-phonebook">
+      <GlobalStyles />
+      <App />
+    </BrowserRouter>
+  </Provider>
+);
+
+/* src/index.css */
+@import-normalize; /* bring in normalize.css styles */
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+// src/styles/GlobalStyles.js
+import { createGlobalStyle } from 'styled-components';
+
+const GlobalStyles = createGlobalStyle`
+  body {
+    font-family: 'Roboto', sans-serif; // Nowoczesna czcionka
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5; // Jasne tło
+  }
+
+  h1, h2, h3 {
+    font-weight: 400; // Lżejsze nagłówki
+  }
+
+  a {
+    color: #007bff; // Kolor linków
+    text-decoration: none;
+  }
+
+  button {
+    background-color: #007bff; // Kolor przycisków
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px; // Zaokrąglone rogi
+  }
+`;
+
+export default GlobalStyles;
+
+// src/redux/authSlice.js
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import axios from 'axios';
+
+axios.defaults.baseURL = 'https://connections-api.herokuapp.com';
+
+const token = {
+  set(token) {
+    axios.defaults.headers.common.Authorization = `Bearer ${token}`;
+  },
+  unset() {
+    axios.defaults.headers.common.Authorization = '';
+  },
+};
+
+export const registerUser = createAsyncThunk(
+  'auth/register',
+  async (credentials, thunkAPI) => {
+    try {
+      const response = await axios.post('/users/signup', credentials);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const loginUser = createAsyncThunk(
+  'auth/login',
+  async (credentials, thunkAPI) => {
+    try {
+      const response = await axios.post('/users/login', credentials);
+      token.set(response.data.token);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.message);
+    }
+  }
+);
+
+export const logoutUser = createAsyncThunk(
+  'auth/logout',
+  async (_, thunkAPI) => {
+    try {
+      await axios.post('/users/logout');
+      token.unset();
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.message);
+    }
+  }
+);
+
+export const refreshUser = createAsyncThunk(
+  'auth/refresh',
+  async (_, thunkAPI) => {
+    const state = thunkAPI.getState();
+    const persistedToken = state.auth.token;
+
+    if (persistedToken === null) {
+      return thunkAPI.rejectWithValue('Unable to fetch user');
+    }
+
+    try {
+      token.set(persistedToken);
+      const response = await axios.get('/users/current');
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.message);
+    }
+  }
+);
+
+const authSlice = createSlice({
+  name: 'auth',
+  initialState: {
+    user: null,
+    token: null,
+    isLoggedIn: false,
+    isRefreshing: false,
+    error: null,
+  },
+  extraReducers: builder => {
+    builder
+      .addCase(registerUser.fulfilled, (state, action) => {
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.isLoggedIn = true;
+      })
+      .addCase(loginUser.fulfilled, (state, action) => {
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.isLoggedIn = true;
+      })
+      .addCase(logoutUser.fulfilled, state => {
+        state.user = null;
+        state.token = null;
+        state.isLoggedIn = false;
+      })
+      .addCase(refreshUser.pending, state => {
+        state.isRefreshing = true;
+      })
+      .addCase(refreshUser.fulfilled, (state, action) => {
+        state.user = action.payload;
+        state.isLoggedIn = true;
+        state.isRefreshing = false;
+      })
+      .addCase(refreshUser.rejected, state => {
+        state.isRefreshing = false;
+      });
+  },
+});
+
+export default authSlice.reducer;
+
+// src/redux/axiosConfig.js
+import axios from 'axios';
+import { store } from './store';
+
+axios.defaults.baseURL = 'https://connections-api.herokuapp.com';
+
+axios.interceptors.request.use(
+  config => {
+    const token = store.getState().auth.token;
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  error => {
+    return Promise.reject(error);
+  }
+);
+
+// src/redux/contactsSlice.js
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import axios from 'axios';
+
+axios.defaults.baseURL = 'https://connections-api.herokuapp.com';
+
+export const fetchContacts = createAsyncThunk(
+  'contacts/fetchContacts',
+  async (_, thunkAPI) => {
+    try {
+      const response = await axios.get('/contacts');
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.message);
+    }
+  }
+);
+
+export const addContact = createAsyncThunk(
+  'contacts/addContact',
+  async (contact, thunkAPI) => {
+    try {
+      // Sprawdź strukturę danych
+      console.log('Adding contact:', contact);
+      const response = await axios.post('/contacts', contact);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response.data || error.message);
+    }
+  }
+);
+
+export const deleteContact = createAsyncThunk(
+  'contacts/deleteContact',
+  async (contactId, thunkAPI) => {
+    try {
+      const response = await axios.delete(`/contacts/${contactId}`);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.message);
+    }
+  }
+);
+
+const contactsSlice = createSlice({
+  name: 'contacts',
+  initialState: {
+    contacts: [],
+    filter: '',
+    status: 'idle',
+    error: null,
+  },
+  reducers: {
+    setFilter: (state, action) => {
+      state.filter = action.payload;
+    },
+  },
+  extraReducers: builder => {
+    builder
+      .addCase(fetchContacts.pending, state => {
+        state.status = 'loading';
+      })
+      .addCase(fetchContacts.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.contacts = action.payload;
+      })
+      .addCase(fetchContacts.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload;
+      })
+      .addCase(addContact.fulfilled, (state, action) => {
+        state.contacts.push(action.payload);
+      })
+      .addCase(deleteContact.fulfilled, (state, action) => {
+        state.contacts = state.contacts.filter(
+          contact => contact.id !== action.payload.id
+        );
+      })
+      .addCase(addContact.rejected, (state, action) => {
+        state.error = action.payload;
+      });
+  },
+});
+
+export const { setFilter } = contactsSlice.actions;
+export default contactsSlice.reducer;
+
+// src/redux/store.js
+import { configureStore } from '@reduxjs/toolkit';
+import authReducer from './authSlice';
+import contactsReducer from './contactsSlice';
+
+export const store = configureStore({
+  reducer: {
+    auth: authReducer,
+    contacts: contactsReducer,
+  },
+});
+
+// src/pages/ContactsPage/ContactsPage.jsx
+import React from 'react';
+import ContactForm from '../../components/ContactForm/ContactForm';
+import ContactList from '../../components/ContactList/ContactList';
+import Filter from '../../components/Filter/Filter';
+
+const ContactsPage = () => {
+  return (
+    <div>
+      <h1>Contacts</h1>
+      <ContactForm />
+      <Filter />
+      <ContactList />
+    </div>
+  );
+};
+
+export default ContactsPage;
+
+// src/pages/ContactsPage/ContactsPage.styled.js
+
+// src/pages/LoginPage/LoginPage.jsx
+
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { loginUser } from '../../redux/authSlice';
+import { useNavigate } from 'react-router-dom';
+import { Form, Label, Input, Button } from './LoginPage.styled';
+
+const LoginPage = () => {
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+  });
+  const dispatch = useDispatch();
+  const error = useSelector(state => state.auth.error);
+  const navigate = useNavigate();
+
+  const handleChange = e => {
+    const { name, value } = e.target;
+    setFormData(prevFormData => ({
+      ...prevFormData,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async e => {
+    e.preventDefault();
+    try {
+      await dispatch(loginUser(formData)).unwrap();
+      navigate('/contacts');
+    } catch (error) {
+      console.error('Login failed:', error);
+    }
+  };
+
+  return (
+    <Form onSubmit={handleSubmit}>
+      <Label>
+        Email
+        <Input
+          type="email"
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
+        />
+      </Label>
+      <Label>
+        Password
+        <Input
+          type="password"
+          name="password"
+          value={formData.password}
+          onChange={handleChange}
+        />
+      </Label>
+      {error && <p>Error: {error}</p>}
+      <Button type="submit">Login</Button>
+    </Form>
+  );
+};
+
+export default LoginPage;
+
+// src/pages/LoginPage/LoginPage.styled.js
+import styled from 'styled-components';
+
+export const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+  max-width: 400px;
+  margin: 50px auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+`;
+
+export const Label = styled.label`
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+  font-size: 1rem;
+  color: #333;
+`;
+
+export const Input = styled.input`
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+`;
+
+export const Button = styled.button`
+  padding: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: #0056b3;
+  }
+`;
+
+// src/pages/RegisterPage/RegisterPage.jsx
+
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { registerUser } from '../../redux/authSlice';
+import { useNavigate } from 'react-router-dom';
+import { Form, Label, Input, Button } from './RegisterPage.styled';
+
+const RegisterPage = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+  });
+  const dispatch = useDispatch();
+  const error = useSelector(state => state.auth.error);
+  const navigate = useNavigate();
+
+  const handleChange = e => {
+    const { name, value } = e.target;
+    setFormData(prevFormData => ({
+      ...prevFormData,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async e => {
+    e.preventDefault();
+    try {
+      await dispatch(registerUser(formData)).unwrap();
+      navigate('/contacts');
+    } catch (error) {
+      console.error('Registration failed:', error);
+    }
+  };
+
+  return (
+    <Form onSubmit={handleSubmit}>
+      <Label>
+        Name
+        <Input
+          type="text"
+          name="name"
+          value={formData.name}
+          onChange={handleChange}
+          required
+        />
+      </Label>
+      <Label>
+        Email
+        <Input
+          type="email"
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
+          required
+        />
+      </Label>
+      <Label>
+        Password
+        <Input
+          type="password"
+          name="password"
+          value={formData.password}
+          onChange={handleChange}
+          required
+        />
+      </Label>
+      {error && <p>Error: {error}</p>}
+      <Button type="submit">Register</Button>
+    </Form>
+  );
+};
+
+export default RegisterPage;
+
+// src/pages/RegisterPage/RegisterPage.styled.js
+import styled from 'styled-components';
+
+export const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+  max-width: 400px;
+  margin: 50px auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+`;
+
+export const Label = styled.label`
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+  font-size: 1rem;
+  color: #333;
+`;
+
+export const Input = styled.input`
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+`;
+
+export const Button = styled.button`
+  padding: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: #0056b3;
+  }
+`;
+
+// src/components/App/App.jsx
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Route, Routes, Navigate } from 'react-router-dom';
+import RegisterPage from '../../pages/RegisterPage/RegisterPage';
+import LoginPage from '../../pages/LoginPage/LoginPage';
+import ContactsPage from '../../pages/ContactsPage/ContactsPage';
+import Navigation from '../Navigation/Navigation';
+import { Container } from './App.styled';
+import { refreshUser } from '../../redux/authSlice';
+
+const App = () => {
+  const dispatch = useDispatch();
+  const isLoggedIn = useSelector(state => state.auth.isLoggedIn);
+  const isRefreshing = useSelector(state => state.auth.isRefreshing);
+
+  useEffect(() => {
+    dispatch(refreshUser());
+  }, [dispatch]);
+
+  return (
+    <Container>
+      {isRefreshing ? (
+        <p>Refreshing user...</p>
+      ) : (
+        <>
+          <Navigation />
+          <Routes>
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route
+              path="/contacts"
+              element={isLoggedIn ? <ContactsPage /> : <Navigate to="/login" />}
+            />
+            <Route path="*" element={<Navigate to="/login" />} />
+          </Routes>
+        </>
+      )}
+    </Container>
+  );
+};
+
+export default App;
+
+// src/components/App/App.styled.js
+import styled from 'styled-components';
+
+export const Container = styled.div`
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: #ffffff;
+`;
+
+export const Title = styled.h1`
+  margin-bottom: 20px;
+  font-size: 2.5rem;
+  color: #333;
+  text-align: center;
+`;
+
+export const SubTitle = styled.h2`
+  margin-bottom: 10px;
+  font-size: 1.5rem;
+  color: #333;
+  text-align: center;
+`;
+
+// src/components/ContactForm/ContactForm.jsx
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { addContact } from '../../redux/contactsSlice';
+import { Form, Label, Input, Button } from './ContactForm.styled';
+
+const ContactForm = () => {
+  const [name, setName] = useState('');
+  const [number, setNumber] = useState('');
+  const dispatch = useDispatch();
+  const error = useSelector(state => state.contacts.error);
+
+  const handleSubmit = e => {
+    e.preventDefault();
+    dispatch(addContact({ name, number }));
+    setName('');
+    setNumber('');
+  };
+
+  return (
+    <Form onSubmit={handleSubmit}>
+      <Label>
+        Name
+        <Input
+          type="text"
+          value={name}
+          onChange={e => setName(e.target.value)}
+        />
+      </Label>
+      <Label>
+        Number
+        <Input
+          type="text"
+          value={number}
+          onChange={e => setNumber(e.target.value)}
+        />
+      </Label>
+      {error && <p>Error: {error}</p>}
+      <Button type="submit">Add contact</Button>
+    </Form>
+  );
+};
+
+export default ContactForm;
+
+// src/components/ContactForm/ContactForm.styled.js
+import styled from 'styled-components';
+
+export const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+`;
+
+export const Label = styled.label`
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+  font-size: 1rem;
+  color: #333;
+`;
+
+export const Input = styled.input`
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+`;
+
+export const Button = styled.button`
+  padding: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: #0056b3;
+  }
+`;
+
+// src/components/ContactItem/ContactItem.jsx
+import React from 'react';
+import PropTypes from 'prop-types';
+import { Item, Button } from './ContactItem.styled';
+
+const ContactItem = ({ contact, onDelete }) => {
+  return (
+    <Item>
+      <span>
+        {contact.name}: {contact.number}
+      </span>
+      <Button onClick={onDelete}>Delete</Button>
+    </Item>
+  );
+};
+
+ContactItem.propTypes = {
+  contact: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    number: PropTypes.string.isRequired,
+  }).isRequired,
+  onDelete: PropTypes.func.isRequired,
+};
+
+export default ContactItem;
+
+// src/components/ContactItem/ContactItem.styled.js
+import styled from 'styled-components';
+
+export const Item = styled.li`
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  margin-bottom: 5px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+`;
+
+export const Button = styled.button`
+  padding: 5px 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  background-color: #ff0000;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: #cc0000;
+  }
+`;
+
+// src/components/ContactList/ContactList.jsx
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchContacts, deleteContact } from '../../redux/contactsSlice';
+import ContactItem from '../ContactItem/ContactItem';
+import { List } from './ContactList.styled';
+
+const ContactList = () => {
+  const { contacts, filter, status, error } = useSelector(
+    state => state.contacts
+  );
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(fetchContacts());
+  }, [dispatch]);
+
+  const filteredContacts = contacts.filter(contact =>
+    contact.name.toLowerCase().includes(filter.toLowerCase())
+  );
+
+  if (status === 'loading') {
+    return <div>Loading...</div>;
+  }
+
+  if (status === 'failed') {
+    return <div>Error: {error}</div>;
+  }
+
+  if (!contacts) {
+    return <div>No contacts available</div>;
+  }
+
+  return (
+    <List>
+      {filteredContacts.map(contact => (
+        <ContactItem
+          key={contact.id}
+          contact={contact}
+          onDelete={() => dispatch(deleteContact(contact.id))}
+        />
+      ))}
+    </List>
+  );
+};
+
+export default ContactList;
+
+// src/components/ContactList/ContactList.styled.js
+import styled from 'styled-components';
+
+export const List = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 0;
+`;
+
+// src/components/Filter/Filter.jsx
+import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { setFilter } from '../../redux/contactsSlice';
+import { Label, Input } from './Filter.styled';
+
+const Filter = () => {
+  const dispatch = useDispatch();
+  const filter = useSelector(state => state.contacts.filter);
+
+  return (
+    <Label>
+      Find contacts by name
+      <Input
+        type="text"
+        value={filter}
+        onChange={e => dispatch(setFilter(e.target.value))}
+      />
+    </Label>
+  );
+};
+
+export default Filter;
+
+// src/components/Filter/Filter.styled.js
+import styled from 'styled-components';
+
+export const Label = styled.label`
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+  font-size: 1rem;
+  color: #333;
+`;
+
+export const Input = styled.input`
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+`;
+
+// src/components/Navigation/Navigation.jsx
+import React from 'react';
+import { NavLink } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { Nav } from './Navigation.styled';
+import UserMenu from '../UserMenu/UserMenu';
+
+const Navigation = () => {
+  const isLoggedIn = useSelector(state => state.auth.isLoggedIn);
+
+  return (
+    <Nav>
+      <div>
+        {!isLoggedIn && <NavLink to="/register">Register</NavLink>}
+        {!isLoggedIn && <NavLink to="/login">Login</NavLink>}
+        {isLoggedIn && <NavLink to="/contacts">Contacts</NavLink>}
+      </div>
+      {isLoggedIn && <UserMenu />}
+    </Nav>
+  );
+};
+
+export default Navigation;
+
+// src/components/Navigation/Navigation.styled.js
+import styled from 'styled-components';
+
+export const Nav = styled.nav`
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  background-color: #f1f1f1;
+
+  a {
+    text-decoration: none;
+    color: #007bff;
+    font-size: 1.2rem;
+    transition: color 0.3s, background-color 0.3s;
+    padding: 10px 20px;
+    border-radius: 5px;
+    margin: 0 5px;
+    border: 1px solid transparent;
+
+    &:hover {
+      color: #ffffff;
+      background-color: #007bff;
+    }
+
+    &.active {
+      color: #ffffff;
+      background-color: #007bff;
+    }
+  }
+
+  div {
+    display: flex;
+    align-items: center;
+  }
+
+  button {
+    height: 40px;
+    padding: 0 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #dc3545;
+    color: #ffffff;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+
+    &:hover {
+      background-color: #c82333;
+    }
+  }
+`;
+
+// src/components/UserMenu/UserMenu.jsx
+import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { logoutUser } from '../../redux/authSlice';
+import { useNavigate } from 'react-router-dom';
+import { MenuContainer, Email, LogoutButton } from './UserMenu.styled';
+
+const UserMenu = () => {
+  const dispatch = useDispatch();
+  const user = useSelector(state => state.auth.user);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    dispatch(logoutUser()).then(() => {
+      navigate('/login');
+    });
+  };
+
+  return (
+    <MenuContainer>
+      <Email>{user?.email}</Email>
+      <LogoutButton onClick={handleLogout}>Logout</LogoutButton>
+    </MenuContainer>
+  );
+};
+
+export default UserMenu;
+
+// src/components/UserMenu/UserMenu.styled.js
+import styled from 'styled-components';
+
+export const MenuContainer = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+export const Email = styled.p`
+  margin-right: 20px;
+  font-size: 1rem;
+  color: #333;
+`;
+
+export const LogoutButton = styled.button`
+  padding: 5px 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  background-color: #ff0000;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: #cc0000;
+  }
+`;
