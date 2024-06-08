@@ -4,6 +4,7 @@ import styled from 'styled-components';
 export const Nav = styled.nav`
   display: flex;
   justify-content: space-between;
+  align-items: center;
   padding: 10px;
   background-color: #f1f1f1;
 
@@ -47,5 +48,25 @@ export const Nav = styled.nav`
     &:hover {
       background-color: #c82333;
     }
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column-reverse;
+
+    div,
+    button {
+      margin-bottom: 10px;
+    }
+  }
+`;
+
+export const Title = styled.h1`
+  font-size: 1.5rem;
+  color: #343a40;
+  margin: 0 20px;
+  text-align: center;
+
+  @media (max-width: 768px) {
+    margin: 10px 0;
   }
 `;

@@ -2,7 +2,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { Nav } from './Navigation.styled';
+import { Nav, Title } from './Navigation.styled';
 import UserMenu from '../UserMenu/UserMenu';
 
 const Navigation = () => {
@@ -10,6 +10,7 @@ const Navigation = () => {
 
   return (
     <Nav>
+      <Title>Phonebook</Title>
       <div>
         {!isLoggedIn && <NavLink to="/register">Register</NavLink>}
         {!isLoggedIn && <NavLink to="/login">Login</NavLink>}
